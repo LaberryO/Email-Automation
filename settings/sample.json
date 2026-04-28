@@ -1,8 +1,10 @@
 {
-    "EMAIL":"",
-    "APP_PASSWORD":"",
-    "SMTP_ADDRESS":"",
-    "SMTP_PORT":111,
+    "email":"",
+    "app_password":"",
+    "smtp_address":"",
+    "smtp_port":465,
 
-    "EMAIL_SUBJECT":""
+    "email_subject":"",
+    "pdf_filename":"",
+    "target_cols":[]
 }
