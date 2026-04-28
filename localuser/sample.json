@@ -1,0 +1,8 @@
+{
+    "EMAIL":"",
+    "APP_PASSWORD":"",
+    "SMTP_ADDRESS":"",
+    "SMTP_PORT":111,
+
+    "EMAIL_SUBJECT":""
+}

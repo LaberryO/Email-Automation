@@ -1,6 +1,7 @@
 # private files
 localuser/*
 !localuser/readme.txt
+!localuser/sample.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
