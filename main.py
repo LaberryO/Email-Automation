@@ -33,12 +33,12 @@ def exception(text, status):
     print(f"{STATUS[status]} {text}")
 
 try:
-    with open(FILE_NAME[0], "r", encoding="utf-8") as file:
-        data = json.load()
+    with open(f"localuser/{FILE_NAME[0]}", "r", encoding="utf-8") as file:
+        data = json.load(file)
         exception("data load complete",1)
 
 except FileNotFoundError:
-    exception("file not found",2)
+    exception("data file not found",2)
 
 except json.JSONDecodeError:
     exception("json decode failed",2)
@@ -52,8 +52,7 @@ except PermissionError:
 
 try:
     exception("try connect smtp server..",0)
-    sv = smtplib.SMTP(data["SMTP_ADDRESS"], data["SMTP_PORT"])
-    sv.starttls()
+    sv = smtplib.SMTP_SSL(data["SMTP_ADDRESS"], data["SMTP_PORT"])
     sv.login(data["EMAIL"], data["APP_PASSWORD"])
     exception("stmp connected",1)
 
@@ -70,10 +69,10 @@ except Exception as e:
 # =======
 
 try:
-    with open("localuser/image.png") as f:
+    with open("localuser/image.png", "rb") as f:
         cached_image_data = f.read()
     
-    with open("localuser/catalog.pdf") as f:
+    with open("localuser/catalog.pdf", "rb") as f:
         cached_pdf_data = f.read()
 
     df = pd.read_csv(f"localuser/{FILE_NAME[1]}", usecols=TARGET_COLS)
@@ -101,7 +100,7 @@ try:
             pdf_part.add_header("Content-Disposition", "attachment", filename=data["PDF_FILENAME"])
             msg.attach(pdf_part)
 
-            sv.send_message()
+            sv.send_message(msg)
             exception(f"send email to {user_email}({user_name})",1)
             success_list.append(f"{user_email}")
         
@@ -118,7 +117,7 @@ except FileNotFoundError:
     exception(f"{FILE_NAME[1]} not found",2)
 
 except Exception as e:
-    exception("email logic error",2)
+    exception(f"email logic error: {e}",2)
 
 finally:
     # sever disconnect
@@ -135,12 +134,12 @@ finally:
         log_filename = f"log_{now}.txt"
         
         # 이전 질문에서 다뤘던 'with open'을 활용해 파일 작성 ('w' 모드)
-        with open(log_filename, "w", encoding="utf-8") as log_file:
+        with open(f"logs/{log_filename}", "w", encoding="utf-8") as log_file:
             log_file.write(f"{now}\n")
             log_file.write("\n")
             
             # 성공 내역 기록
-            log_file.write(f"[SUCCESS]: {len(success_list)}\n")
+            log_file.write(f"[SUCCESS] {len(success_list)}\n")
             for email in success_list:
                 log_file.write(f" - {email}\n")
                 
