@@ -1,4 +1,4 @@
-import pandas as pd, smtplib, sys, json, time, logging
+import pandas as pd, smtplib, sys, json, time, logging, os
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -31,6 +31,7 @@ class UserCancelException(Exception): pass
 class EmailSender:
     # 파일 로딩
     def __init__(self):
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         self.server = None
 
     def load(self):
@@ -50,6 +51,8 @@ class EmailSender:
                 self.pdf = file.read()
                 logging.info("pdf load complete")
 
+            return True
+
         except FileNotFoundError:
             logging.error(f"{current_file} file not found")
             return False
@@ -68,8 +71,8 @@ class EmailSender:
         pw = self.config["app_password"]
 
         try:
-            logging.info("try connect smtp server..")
-            if self.config.get("SMTP_PORT") == 465:
+            logging.info(f"try connect smtp server({port})..")
+            if port == 465:
                 logging.info("SMTP PORT is SSL")
                 self.server = smtplib.SMTP_SSL(addr, port)
             else:
@@ -78,6 +81,8 @@ class EmailSender:
                 self.server.starttls()
             self.server.login(email, pw)
             logging.info("stmp connected")
+
+            return True
 
         except smtplib.SMTPAuthenticationError:
             logging.error("incorrect id or password")
@@ -89,7 +94,7 @@ class EmailSender:
     # send email
     def send(self):
         try:
-            df = pd.read_csv(f"localuser/data.csv", usecols=self.config["target_cols"])
+            df = pd.read_csv(f"localuser/test.csv", usecols=self.config["target_cols"])
 
             # 발송 여부 확인
             check = str(input(f"{len(df)}명에게 정말로 발송하시겠습니까? (Y/N)"))
@@ -154,4 +159,5 @@ if __name__ == "__main__":
         sys.exit()
 
     finally:
+        logging.info("program close.")
         app.close()
