@@ -1,5 +1,5 @@
 import pandas as pd
-import smtplib, sys, json, datetime, time
+import smtplib, sys, json, datetime, time, logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
@@ -9,7 +9,18 @@ from email.mime.application import MIMEApplication
 # setting
 # =======
 
-FILE_NAME = ["data.json", "test.csv"] # index 0: 사용자 정보, index 1: 고객 정보
+now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(f"logs/log_{now}.txt", encoding="utf-8"),
+        logging.StreamHandler()
+    ]
+)
+
+FILE_NAME = ["data.json", "custom_data.csv"] # index 0: 사용자 정보, index 1: 고객 정보
 TARGET_COLS = ["업체명", "이메일"]
 
 EMAIL_CONTENT = """
@@ -20,8 +31,6 @@ EMAIL_CONTENT = """
 </html>
 """
 
-STATUS = ["[INFO]", "[SUCCESS]", "[ERROR]"]
-
 success_list = []
 fail_list = []
 
@@ -29,39 +38,38 @@ fail_list = []
 # load data
 # =======
 
-def exception(text, status):
-    print(f"{STATUS[status]} {text}")
+logging.info("program start")
 
 try:
     with open(f"localuser/{FILE_NAME[0]}", "r", encoding="utf-8") as file:
         data = json.load(file)
-        exception("data load complete",1)
+        logging.info("data load complete")
 
 except FileNotFoundError:
-    exception("data file not found",2)
+    logging.info("data file not found")
 
 except json.JSONDecodeError:
-    exception("json decode failed",2)
+    logging.error("json decode failed")
 
 except PermissionError:
-    exception("no permission",2)
+    logging.error("no permission")
 
 # =======
 # smtp connection
 # =======
 
 try:
-    exception("try connect smtp server..",0)
+    logging.info("try connect smtp server..")
     sv = smtplib.SMTP_SSL(data["SMTP_ADDRESS"], data["SMTP_PORT"])
     sv.login(data["EMAIL"], data["APP_PASSWORD"])
-    exception("stmp connected",1)
+    logging.info("stmp connected")
 
 except smtplib.SMTPAuthenticationError:
-    exception("incorrect id and password",2)
+    logging.error("incorrect id and password")
     sys.exit()
 
 except Exception as e:
-    exception(f"smtp connection error: {e}", 2)
+    logging.error(f"smtp connection error: {e}")
     sys.exit()
 
 # =======
@@ -101,56 +109,28 @@ try:
             msg.attach(pdf_part)
 
             sv.send_message(msg)
-            exception(f"send email to {user_email}({user_name})",1)
+            logging.info(f"send email to {user_email}({user_name})")
             success_list.append(f"{user_email}")
         
         except Exception as e:
-            exception(f"failed send email: {e}",2)
+            logging.error(f"failed send email: {e}")
             fail_list.append(f"{user_email} reason: {e}")
             continue
 
         finally:
-            exception("wait a second..",0)
+            logging.info("wait a second..")
             time.sleep(1.5)
 
 except FileNotFoundError:
-    exception(f"{FILE_NAME[1]} not found",2)
+    logging.error(f"{FILE_NAME[1]} not found")
 
 except Exception as e:
-    exception(f"email logic error: {e}",2)
+    logging.error(f"email logic error: {e}")
 
 finally:
     # sever disconnect
     try:
         sv.quit()
-        exception("server closed",0)
-    except:
-        pass
-
-    # log
-    try:
-        # 현재 시간을 'YYYY-MM-DD_HH-MM-SS' 형태로 포맷팅
-        now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        log_filename = f"log_{now}.txt"
-        
-        # 이전 질문에서 다뤘던 'with open'을 활용해 파일 작성 ('w' 모드)
-        with open(f"logs/{log_filename}", "w", encoding="utf-8") as log_file:
-            log_file.write(f"{now}\n")
-            log_file.write("\n")
-            
-            # 성공 내역 기록
-            log_file.write(f"[SUCCESS] {len(success_list)}\n")
-            for email in success_list:
-                log_file.write(f" - {email}\n")
-                
-            log_file.write("\n")
-            
-            # 실패 내역 기록
-            log_file.write(f"[ERROR] {len(fail_list)}\n")
-            for fail_info in fail_list:
-                log_file.write(f" - {fail_info}\n")
-        
-        exception("program ended. log file saved.",0)
-
+        logging.info("server closed. program ended.")
     except Exception as e:
-        exception("program ended. but log file save failed",2)
+        logging.error("abnormally shutdown detected. program ended.")
