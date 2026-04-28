@@ -3,6 +3,9 @@ localuser/*
 !localuser/readme.txt
 !localuser/sample.json
 
+# logs
+logs/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
