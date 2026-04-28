@@ -1,7 +1,7 @@
 # private files
-localuser/*
-!localuser/readme.txt
-!localuser/sample.json
+settings/*
+!settings/readme.txt
+!settings/sample.json
 
 # logs
 logs/*

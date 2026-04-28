@@ -24,7 +24,7 @@ EMAIL_CONTENT = """
 </html>
 """
 
-path = "localuser/"
+path = "settings/"
 
 class UserCancelException(Exception): pass
 
