@@ -60,8 +60,15 @@ except PermissionError:
 
 try:
     logging.info("try connect smtp server..")
-    sv = smtplib.SMTP_SSL(data["SMTP_ADDRESS"], data["SMTP_PORT"])
-    sv.login(data["EMAIL"], data["APP_PASSWORD"])
+    if data.get("SMTP_PORT") == 465:
+        logging.info("SMTP PORT is SSL")
+        sv = smtplib.SMTP_SSL(data["SMTP_ADDRESS"], data["SMTP_PORT"])
+        sv.login(data["EMAIL"], data["APP_PASSWORD"])
+    else:
+        logging.info("SMTP PORT is not SSL")
+        sv = smtplib.SMTP(data["SMTP_ADDRESS"], data["SMTP_PORT"])
+        sv.starttls()
+        sv.login(data["EMAIL"], data["APP_PASSWORD"])
     logging.info("stmp connected")
 
 except smtplib.SMTPAuthenticationError:
