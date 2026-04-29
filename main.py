@@ -94,8 +94,11 @@ class EmailSender:
     def send(self):
         try:
             # 혹시 모를 debug code
-            if self.config["debug_mode"]: filename = "debug"
-            else: filename = "data"
+            if self.config["debug_mode"]: 
+                filename = "debug"
+                logging.info(f"debug mode enabled: {path}{filename}.csv")
+            else: 
+                filename = "data"
             df = pd.read_csv(f"{path}{filename}.csv", usecols=self.config["target_cols"])
 
             # 발송 여부 확인
