@@ -130,7 +130,7 @@ class EmailSender:
 
                     # PDF 파일 첨부
                     pdf_part = MIMEApplication(self.pdf, _subtype="pdf")
-                    pdf_part.add_header("Content-Disposition", "attachment", filename=self.config["pdf_filename"])
+                    pdf_part.add_header("Content-Disposition", "attachment", filename=f"{self.config["pdf_filename"]}.pdf")
                     msg.attach(pdf_part)
 
                     self.server.send_message(msg)
@@ -143,6 +143,9 @@ class EmailSender:
                 finally:
                     logging.info("wait a second..")
                     time.sleep(1.5)
+
+        except UserCancelException:
+            logging.info("user canceled.")
 
         # 보통 csv 에러 감지
         except Exception as e:
@@ -162,8 +165,6 @@ if __name__ == "__main__":
             raise ConnectionError("stmp connect failed.")
         app.send()
         
-    except UserCancelException:
-        logging.info("user canceled.")
     except Exception as e:
         logging.critical(f"fatal error detected: {e}")
         sys.exit()
