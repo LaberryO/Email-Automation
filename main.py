@@ -111,9 +111,12 @@ class EmailSender:
                 else:
                     continue
             
-            for row in df.itertuples():
-                user_email = row.이메일
-                user_name = row.업체명
+            for index, row in df.iterrows():
+                if index >= 500: 
+                    logging.info(f"mail send limit exceeded: {index}")
+                    break
+                user_email = row["이메일"]
+                user_name = row["업체명"]
 
                 try:
                     msg = MIMEMultipart()
@@ -141,8 +144,8 @@ class EmailSender:
                     continue
 
                 finally:
-                    logging.info("wait a second..")
-                    time.sleep(1.5)
+                    logging.info(f"complete! {index}")
+                    # time.sleep(1.5)
 
         except UserCancelException:
             logging.info("user canceled.")
