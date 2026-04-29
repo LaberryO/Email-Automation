@@ -1,5 +1,4 @@
 import pandas as pd, smtplib, sys, json, time, logging, os
-from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
@@ -10,7 +9,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(f"logs/log_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.txt", encoding="utf-8"),
+        logging.FileHandler("logs/latest.txt", mode="w", encoding="utf-8"),
         logging.StreamHandler()
     ]
 )
