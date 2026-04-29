@@ -94,12 +94,20 @@ class EmailSender:
     # send email
     def send(self):
         try:
-            df = pd.read_csv(f"localuser/test.csv", usecols=self.config["target_cols"])
+            # 혹시 모를 debug code
+            if self.config["debug_mode"]: filename = "debug"
+            else: filename = "data"
+            df = pd.read_csv(f"{path}{filename}.csv", usecols=self.config["target_cols"])
 
             # 발송 여부 확인
-            check = str(input(f"{len(df)}명에게 정말로 발송하시겠습니까? (Y/N)"))
-            if check.lower() == "n":
-                raise UserCancelException
+            while True:
+                check = str(input(f"{len(df)}명에게 정말로 발송하시겠습니까? (Y/N)")).lower()
+                if check == "n":
+                    raise UserCancelException
+                elif check == "y":
+                    break
+                else:
+                    continue
             
             for row in df.itertuples():
                 user_email = row.이메일

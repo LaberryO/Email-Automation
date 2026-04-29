@@ -6,5 +6,7 @@
 
     "email_subject":"",
     "pdf_filename":"",
-    "target_cols":[]
+    "target_cols":[],
+
+    "debug_mode":false
 }
