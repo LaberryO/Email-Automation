@@ -27,7 +27,8 @@ EMAIL_CONTENT = """
 
 path = "settings/"
 
-email_regex = r"^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+# 하이픈(-)을 맨 뒤로 보냈습니다.
+email_regex = r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
 class UserCancelException(Exception): pass
 
