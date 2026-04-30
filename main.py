@@ -3,6 +3,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
+from pathlib import Path
 
 # logging
 logging.basicConfig(
@@ -97,7 +98,10 @@ class EmailSender:
             if self.config["debug_mode"]: 
                 filename = "debug"
                 logging.info(f"debug mode enabled: {path}{filename}.csv")
-            else: 
+            elif Path(f"{path}remaining_data.csv").is_file():
+                filename = "remaining_data"
+                logging.info("remainig data found.")
+            else:
                 filename = "data"
             df = pd.read_csv(f"{path}{filename}.csv", usecols=self.config["target_cols"])
 
@@ -114,6 +118,8 @@ class EmailSender:
             for index, row in df.iterrows():
                 if index >= 500: 
                     logging.info(f"mail send limit exceeded: {index}")
+                    remaining_df = df.loc[index:, self.config["target_cols"]]
+                    remaining_df.to_csv(f"{path}remaining_data.csv", index=False, encoding="utf-8")
                     break
                 user_email = row["이메일"]
                 user_name = row["업체명"]
@@ -136,8 +142,8 @@ class EmailSender:
                     pdf_part.add_header("Content-Disposition", "attachment", filename=f"{self.config["pdf_filename"]}.pdf")
                     msg.attach(pdf_part)
 
-                    self.server.send_message(msg)
                     logging.info(f"send email to {user_email}({user_name})")
+                    self.server.send_message(msg)
 
                 except Exception as e:
                     logging.error(f"failed send email: {e}")
@@ -145,7 +151,11 @@ class EmailSender:
 
                 finally:
                     logging.info(f"complete! {index}")
-                    # time.sleep(1.5)
+                    time.sleep(1)
+            else:
+                if Path(f"{path}remaining.csv").is_file():
+                    os.remove(f"{path}remaining.csv")
+                    logging.info("all mails sent. deleted remaining_data.csv")
 
         except UserCancelException:
             logging.info("user canceled.")
