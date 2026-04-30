@@ -153,8 +153,8 @@ class EmailSender:
                     logging.info(f"complete! {index}")
                     time.sleep(1)
             else:
-                if Path(f"{path}remaining.csv").is_file():
-                    os.remove(f"{path}remaining.csv")
+                if Path(f"{path}remaining_data.csv").is_file():
+                    os.remove(f"{path}remaining_data.csv")
                     logging.info("all mails sent. deleted remaining_data.csv")
 
         except UserCancelException:
