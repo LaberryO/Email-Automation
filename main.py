@@ -139,6 +139,7 @@ class EmailSender:
                 try:
                     user_name = row["업체명"]
                     user_email = row["이메일"]
+                    logging.info(f"({index}) try send email to {user_email}({user_name})")
 
                     # 정규식 검증
                     if not re.match(email_regex, user_email):
@@ -161,9 +162,8 @@ class EmailSender:
                     pdf_part.add_header("Content-Disposition", "attachment", filename=f"{self.config["pdf_filename"]}.pdf")
                     msg.attach(pdf_part)
 
-                    logging.info(f"try send email to {user_email}({user_name})")
                     self.server.send_message(msg)
-
+                    logging.info(f"send email successful: {user_email}({user_name})")
                     status["success"] += 1
 
                 except ValueError:
@@ -176,10 +176,18 @@ class EmailSender:
                 except Exception as e:
                     logging.error(f"failed send email: {e}")
                     status["error"] += 1
-                    continue
+                    while True:
+                        except_check = str(input("press enter to exit. typing 'resume' to resume: ")).lower()
+                        if not except_check:
+                            raise UserCancelException
+                        elif except_check == "resume":
+                            logging.info("resume to next process")
+                            break
+                        else:
+                            logging.warning("invalid input. try again")
+                            continue
 
                 finally:
-                    logging.info(f"send complete {index}")
                     time.sleep(1)
             else:
                 if Path(f"{path}remaining_data.csv").is_file():
@@ -195,7 +203,7 @@ class EmailSender:
 
         finally:
             if invalid_list:
-                pd.DataFrame(invalid_list).to_csv(f"{path}invalid_data.csv", index=False, encoding="utf-8")
+                pd.DataFrame(invalid_list).to_csv(f"{path}invalid_data.csv", mode="a", index=False, encoding="utf-8")
             logging.info(f"email send process complete. success: {status["success"]}, invalid: {status["invalid"]}, error: {status["error"]}")
             
     def close(self):
