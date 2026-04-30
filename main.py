@@ -116,7 +116,7 @@ class EmailSender:
                     continue
             
             for index, row in df.iterrows():
-                if index >= 500: 
+                if index >= 450: 
                     logging.info(f"mail send limit exceeded: {index}")
                     remaining_df = df.loc[index:, self.config["target_cols"]]
                     remaining_df.to_csv(f"{path}remaining_data.csv", index=False, encoding="utf-8")
