@@ -7,5 +7,3 @@
 
 ## Caution
 Please run the program distributed as a Release, not the source code!
-
-The English translation was written using Google Translate.
