@@ -1,16 +1,17 @@
-import pandas as pd, smtplib, sys, json, time, logging, os
+import pandas as pd, smtplib, sys, json, time, logging, os, re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
 from pathlib import Path
+from datetime import datetime
 
 # logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler("logs/latest.txt", mode="w", encoding="utf-8"),
+        logging.FileHandler(f"logs/log_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.txt", mode="w", encoding="utf-8"),
         logging.StreamHandler()
     ]
 )
@@ -25,6 +26,8 @@ EMAIL_CONTENT = """
 """
 
 path = "settings/"
+
+email_regex = r"^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 
 class UserCancelException(Exception): pass
 
@@ -71,7 +74,7 @@ class EmailSender:
         pw = self.config["app_password"]
 
         try:
-            logging.info(f"try connect smtp server({port})..")
+            logging.info(f"try connect smtp server({port})")
             if port == 465:
                 logging.info("SMTP PORT is SSL")
                 self.server = smtplib.SMTP_SSL(addr, port)
@@ -93,38 +96,53 @@ class EmailSender:
     
     # send email
     def send(self):
+        status = {"success":0, "invalid":0, "error":0}
+        invalid_list = []
         try:
+            logging.info("email process start")
             # 혹시 모를 debug code
             if self.config["debug_mode"]: 
                 filename = "debug"
                 logging.info(f"debug mode enabled: {path}{filename}.csv")
             elif Path(f"{path}remaining_data.csv").is_file():
                 filename = "remaining_data"
-                logging.info("remainig data found.")
+                logging.info("remainig data found")
             else:
                 filename = "data"
             df = pd.read_csv(f"{path}{filename}.csv", usecols=self.config["target_cols"])
 
             # 발송 여부 확인
             while True:
-                check = str(input(f"{len(df)}명에게 정말로 발송하시겠습니까? (Y/N)")).lower()
-                if check == "n":
+                logging.info(f"email total: {len(df)}")
+                send_amount = int(input("이메일 전송 횟수를 입력하십시오. (최대 450회) "))
+                if send_amount <= 0:
                     raise UserCancelException
-                elif check == "y":
-                    break
+                elif send_amount <= len(df):
+                    if send_amount <= 450:
+                        logging.info(f"try send to {send_amount} people")
+                        break
+                    else:
+                        logging.warning("too many value. lower than 450")
+                        continue
                 else:
+                    logging.warning(f"out of range. lower than {len(df)}")
                     continue
-            
+
             for index, row in df.iterrows():
                 if index >= 450: 
                     logging.info(f"mail send limit exceeded: {index}")
                     remaining_df = df.loc[index:, self.config["target_cols"]]
                     remaining_df.to_csv(f"{path}remaining_data.csv", index=False, encoding="utf-8")
                     break
-                user_email = row["이메일"]
-                user_name = row["업체명"]
-
+                
                 try:
+                    user_name = row["업체명"]
+                    user_email = row["이메일"]
+
+                    # 정규식 검증
+                    if not re.match(email_regex, user_email):
+                        raise ValueError
+
                     msg = MIMEMultipart()
                     msg["Subject"] = self.config["email_subject"]
                     msg["From"] = self.config["email"]
@@ -142,15 +160,25 @@ class EmailSender:
                     pdf_part.add_header("Content-Disposition", "attachment", filename=f"{self.config["pdf_filename"]}.pdf")
                     msg.attach(pdf_part)
 
-                    logging.info(f"send email to {user_email}({user_name})")
+                    logging.info(f"try send email to {user_email}({user_name})")
                     self.server.send_message(msg)
+
+                    status["success"] += 1
+
+                except ValueError:
+                    logging.warning("invalid email")
+                    invalid_row = {col: row[col] for col in self.config["target_cols"]}
+                    invalid_list.append(invalid_row)
+                    status["invalid"] += 1
+                    continue
 
                 except Exception as e:
                     logging.error(f"failed send email: {e}")
+                    status["error"] += 1
                     continue
 
                 finally:
-                    logging.info(f"complete! {index}")
+                    logging.info(f"send complete {index}")
                     time.sleep(1)
             else:
                 if Path(f"{path}remaining_data.csv").is_file():
@@ -158,24 +186,29 @@ class EmailSender:
                     logging.info("all mails sent. deleted remaining_data.csv")
 
         except UserCancelException:
-            logging.info("user canceled.")
+            logging.info("user canceled")
 
         # 보통 csv 에러 감지
         except Exception as e:
             logging.error(f"send error: {e}")
-    
+
+        finally:
+            if invalid_list:
+                pd.DataFrame(invalid_list).to_csv(f"{path}invalid_data.csv", index=False, encoding="utf-8")
+            logging.info(f"email send process complete. success: {status["success"]}, invalid: {status["invalid"]}, error: {status["error"]}")
+            
     def close(self):
         if self.server:
             self.server.quit()
-            logging.info("server disconect.")
+            logging.info("server disconect")
 
 if __name__ == "__main__":
     try:
         app = EmailSender()
         if not app.load():
-            raise RuntimeError("data load failed.")
+            raise RuntimeError("data load failed")
         if not app.connect():
-            raise ConnectionError("stmp connect failed.")
+            raise ConnectionError("stmp connect failed")
         app.send()
         
     except Exception as e:
@@ -183,5 +216,5 @@ if __name__ == "__main__":
         sys.exit()
 
     finally:
-        logging.info("program close.")
         app.close()
+        logging.info("program close")
