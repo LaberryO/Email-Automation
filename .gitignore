@@ -1,3 +1,6 @@
+# test files
+test.*
+
 # private files
 settings/*
 !settings/readme.txt
