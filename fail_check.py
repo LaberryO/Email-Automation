@@ -25,7 +25,7 @@ while True:
         continue
 
     # copy 안붙이면 에러남
-    target = df[df[headers[0]] == email].copy()
+    target = df[df[headers[1]] == email].copy()
     if not target.empty:
         row = target.iloc[0]
         print(f"{row[headers[0]]}: {row[headers[1]]} found!")
