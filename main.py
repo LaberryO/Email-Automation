@@ -3,6 +3,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
+from email.header import Header
 from pathlib import Path
 from datetime import datetime
 
@@ -146,14 +147,16 @@ class EmailSender:
                         raise ValueError
 
                     msg = MIMEMultipart()
-                    msg["Subject"] = self.config["email_subject"]
-                    msg["From"] = self.config["email"]
+                    if self.config["debug_mode"]: msg["Subject"] = f"[DEBUG] {datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}"
+                    else: msg["Subject"] = self.config["email_subject"]
+                    msg["From"] = f"{Header(self.config['sender'], 'utf-8').encode()} <{self.config['email']}>"
                     msg["To"] = user_email
 
                     msg.attach(MIMEText(EMAIL_CONTENT, "html"))
 
                     # 본문에 이미지 넣기
                     image_part = MIMEImage(self.image)
+                    image_part.add_header("Content-Disposition", "inline", filename=f"이메일 본문 이미지.{image_part.get_content_subtype()}")
                     image_part.add_header("Content-ID", "<image>")
                     msg.attach(image_part)
 
