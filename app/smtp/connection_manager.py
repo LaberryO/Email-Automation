@@ -1,4 +1,4 @@
-from .SmtpConfig import SmtpConfig
+from .config import SmtpConfig
 from base import BaseConnectionManager
 import smtplib
 

@@ -1,2 +1,2 @@
-from .DbConfig import DbConfig
-from .DbConnectionManager import DbConnectionManager
+from .config import DbConfig
+from .connection_manager import DbConnectionManager

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Type
 from types import TracebackType
-from .BaseConfig import BaseConfig
+from .config import BaseConfig
 
 T = TypeVar("T", bound=BaseConfig) # Type
 C = TypeVar("C") # Connection
@@ -21,7 +21,7 @@ class BaseConnectionManager(ABC, Generic[T, C]):
         """자식 클래스에서 Instance Resource 회수하는 로직"""
         pass
 
-    def _commitOrRollback(self, exc_type: type[BaseException] | None) -> None:
+    def _commit_or_rollback(self, exc_type: type[BaseException] | None) -> None:
         """선택 의존성: DB Transaction 처리 필요 시 Override"""
         pass
 
@@ -39,7 +39,7 @@ class BaseConnectionManager(ABC, Generic[T, C]):
         """공통: Try-With-Resource. 자원 해제 로직"""
         if self.connection is not None:
             try:
-                self._commitOrRollback(exc_type)
+                self._commit_or_rollback(exc_type)
             except Exception:
                 pass
             finally:

@@ -1,4 +1,4 @@
-from .DbConfig import DbConfig
+from .config import DbConfig
 from base import BaseConnectionManager
 import sqlite3
 
@@ -15,7 +15,7 @@ class DbConnectionManager(BaseConnectionManager[DbConfig, sqlite3.Connection]):
         """Override: DB Connection Close"""
         self.connection.close()
 
-    def _commitOrRollback(self, exc_type: type[BaseException] | None) -> None:
+    def _commit_or_rollback(self, exc_type: type[BaseException] | None) -> None:
         """Override: DB Transaction 제어"""
         if exc_type is None:
             # 에러 없음

@@ -1,2 +1,2 @@
-from .SmtpConfig import SmtpConfig
-from .SmtpConnectionManager import SmtpConnectionManager
+from .config import SmtpConfig
+from .connection_manager import SmtpConnectionManager
