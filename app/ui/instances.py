@@ -16,13 +16,15 @@ class CLI(BaseUI):
             return input("> ").strip()
         
     def _render(self, screen: ScreenType):
-        header = screen.value[0]
-        items = screen.value[1:]
+        value_list = screen.value
+        header = value_list[0]
+        items = value_list[1:]
+
 
         print(f"\n{header}")
-        print("0. 종료")
         for index, item in enumerate(items, 1):
             print(f"{index}. {item}")
+        print("\n0. 종료")
         print("")
 
     

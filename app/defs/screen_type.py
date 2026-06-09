@@ -13,4 +13,7 @@ class ScreenType(Enum):
     SEND_EMAIL = [
         "--- Send Email ---"
     ]
+    EXIT_PROGRAM = [
+        "--- Exit Program ---"
+    ]
 

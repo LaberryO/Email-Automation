@@ -17,6 +17,11 @@ class Navigator:
     def state(self):
         return self._state
     
+    @state.setter
+    def state(self, state: ScreenType):
+        self._state = state
+
+    
     @property
     def loader(self):
         return self._loader
@@ -26,6 +31,7 @@ class Navigator:
 
         # 종료 신호
         if text == "0":
+            self.ui.change(ScreenType.EXIT_PROGRAM)
             return False
         
         if self.state == ScreenType.MAIN:
