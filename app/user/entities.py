@@ -1,6 +1,6 @@
 from db import BaseEntity
 
-class UserEntity(BaseEntity):
+class User(BaseEntity):
     def __init__(self, id, name: str, email: str, contact: str):
         super().__init__(id)
         self._name = name
