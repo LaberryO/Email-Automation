@@ -1,3 +1,4 @@
+# connection_manager.py
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Type
 from types import TracebackType

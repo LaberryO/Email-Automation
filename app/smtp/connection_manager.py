@@ -1,3 +1,4 @@
+# connection_manager.py
 from app.smtp import SmtpConfig
 from app.base import BaseConnectionManager
 import smtplib

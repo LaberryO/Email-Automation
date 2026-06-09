@@ -1,3 +1,3 @@
-# Config Tag CLass
+# config.py
 class BaseConfig:
     pass

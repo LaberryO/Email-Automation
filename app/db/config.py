@@ -1,3 +1,4 @@
+# config.py
 from app.base import BaseConfig
 
 class DbConfig(BaseConfig):

@@ -1,12 +1,12 @@
+# loader.py
 import csv, json, os
 from typing import List, Dict
 
 class FileLoader:
-    """파일을 로딩합니다."""
-
     @classmethod
-    def load(cls, path: str) -> List[Dict[str, str]]:
+    def load(cls, path: str, mode: str) -> List[Dict[str, str]]:
         """경로 기반으로 데이터 추출"""
+        
         _, ext = os.path.splitext(path)
         ext = ext.lower()
 

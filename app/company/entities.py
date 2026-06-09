@@ -1,3 +1,4 @@
+# entities.py
 from app.base import BaseEntity
 
 class Company(BaseEntity):

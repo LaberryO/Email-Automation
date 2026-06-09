@@ -1,3 +1,4 @@
+# entity.py
 from abc import ABC, abstractmethod
 
 class BaseEntity(ABC):
