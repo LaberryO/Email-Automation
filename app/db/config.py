@@ -1,4 +1,4 @@
-from base import BaseConfig
+from app.base import BaseConfig
 
 class DbConfig(BaseConfig):
     def __init__(self, path: str):

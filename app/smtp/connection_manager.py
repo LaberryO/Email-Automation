@@ -1,5 +1,5 @@
-from .config import SmtpConfig
-from base import BaseConnectionManager
+from app.smtp import SmtpConfig
+from app.base import BaseConnectionManager
 import smtplib
 
 # SMTP Connection 관리

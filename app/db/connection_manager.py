@@ -1,4 +1,4 @@
-from .config import DbConfig
+from app.db import DbConfig
 from base import BaseConnectionManager
 import sqlite3
 

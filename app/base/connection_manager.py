@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Type
 from types import TracebackType
-from .config import BaseConfig
+from app.base import BaseConfig
 
 T = TypeVar("T", bound=BaseConfig) # Type
 C = TypeVar("C") # Connection

@@ -1,4 +1,4 @@
-from base import BaseConfig
+from app.base import BaseConfig
 
 class SmtpConfig(BaseConfig):
     def __init__(self, address: str, port: str, email: str, password: str):
