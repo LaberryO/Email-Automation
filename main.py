@@ -1,3 +1,1 @@
-from app.worker import FileLoader
-
-FileLoader
+# main.py
