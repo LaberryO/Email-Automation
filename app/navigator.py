@@ -18,6 +18,7 @@ class Navigator:
         self._state = state
 
     def handle_input(self):
+        """input 호출 및 상태 전달"""
         # 최초 시작 시 스킵
         if not self.state:
             return
@@ -43,6 +44,7 @@ class Navigator:
             pass
     
     def update(self) -> bool:
+        """화면 업데이트"""
         if not self.state:
             self.state = self._registry.ROOT.name
 
