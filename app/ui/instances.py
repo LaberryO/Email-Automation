@@ -1,13 +1,10 @@
 # instances.py
 from app.base import BaseUI
-from app.defs import ScreenType
+from app.defs import Menu, MenuRegistry
 
 class CLI(BaseUI):
-    def show(self) -> ScreenType:
+    def show(self):
         self._render(self.screen)
-
-    def change(self, screen: ScreenType):
-        self.screen = screen
 
     def get_input(self, is_text: bool = False) -> str:
         if is_text:
@@ -15,17 +12,22 @@ class CLI(BaseUI):
         else:
             return input("> ").strip()
         
-    def _render(self, screen: ScreenType):
-        value_list = screen.value
-        header = value_list[0]
-        items = value_list[1:]
+    def _render(self, screen: Menu):
+        header = screen.display_name
+        menu = screen.children
 
+        match screen.name:
+            case "ROOT":
+                zero = "\n0. 종료\n"
+            case "QUIT":
+                zero = ""
+            case _:
+                zero = "\n0. 뒤로 가기\n"
 
-        print(f"\n{header}")
-        for index, item in enumerate(items, 1):
-            print(f"{index}. {item}")
-        print("\n0. 종료")
-        print("")
+        print(f"\n--- {header} ---")
+        for index, item in enumerate(menu):
+            print(f"{index + 1}. {item.display_name}")
+        print(zero)
 
     
 class GUI(BaseUI):

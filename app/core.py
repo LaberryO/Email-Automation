@@ -1,11 +1,17 @@
 # core.py
-from app.base import BaseUI
 from app import Navigator
+from app.worker import FileLoader
+from app.ui import CLI
+from app.defs import MenuRegistry
 
-def run(ui: BaseUI, nav: Navigator):
-    while True:
-        ui.show()
+class Core:
+    def __init__(self):
+        loader = FileLoader()
+        ui = CLI()
+        self.nav = Navigator(loader, ui, MenuRegistry)
 
-        if not nav.handle_input():
-            ui.show()
-            break
+    def run(self):
+        running = True
+        while running:
+            self.nav.handle_input()
+            running = self.nav.update()
