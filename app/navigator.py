@@ -7,50 +7,49 @@ class Navigator:
         self._loader = loader
         self._ui = ui
         self._registry = registry_cls
-        self._state: str = None
+        self._state: str = MenuRegistry.ROOT.name
+        self._is_running: bool = True
     
     @property
     def state(self):
         return self._state
-    
-    @state.setter
-    def state(self, state: str):
-        self._state = state
+
+    @property
+    def is_running(self):
+        return self._is_running
 
     def handle_input(self):
-        """input 호출 및 상태 전달"""
-        # 최초 시작 시 스킵
-        if not self.state:
-            return
-
+        """input 호출 및 상태 변경"""
         text = self._ui.get_input()
 
         current_menu = self._registry.find_by_name(self.state)
         if not current_menu:
             return
 
+        # 0 입력시: 종료 또는 뒤로가기
         if text == "0":
             if current_menu == self._registry.ROOT:
-                self.state = self._registry.QUIT.name
+                self._state = self._registry.QUIT.name
+                self._is_running = False
             else:
-                self.state = self._registry.get_parent_name(self.state) if current_menu.parent else self._registry.ROOT.name
+                self._state = self._registry.get_parent_name(self.state) if current_menu.parent else self._registry.ROOT.name
             return
         
+        # 숫자 입력시
         try:
             choice_index = int(text) - 1
             if 0 <= choice_index < len(current_menu.children):
-                self.state = current_menu.children[choice_index].name
-        except ValueError:
+                self._state = current_menu.children[choice_index].name
+        except (ValueError, TypeError):
             pass
     
-    def update(self) -> bool:
-        """화면 업데이트"""
-        if not self.state:
-            self.state = self._registry.ROOT.name
+    def update(self):
+        """비즈니스 로직 및 상태 업데이트"""
+        pass
 
+    def render(self):
+        """화면 렌더링"""
         current_menu = self._registry.find_by_name(self.state)
-
-        self.ui.screen = current_menu
-        self.ui.show()
-
-        return self.state != self._registry.QUIT.name
+        if current_menu:
+            self._ui.screen = current_menu
+            self._ui.show()

@@ -11,7 +11,8 @@ class Core:
         self.nav = Navigator(loader, ui, MenuRegistry)
 
     def run(self):
-        running = True
-        while running:
+        self.nav.render()
+        while self.nav.is_running:
             self.nav.handle_input()
-            running = self.nav.update()
+            self.nav.update()
+            self.nav.render()
